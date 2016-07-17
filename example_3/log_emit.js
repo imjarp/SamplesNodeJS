@@ -4,6 +4,7 @@ var log = require('./logger.js');
 http.createServer(function(request,response){
 
 response.writeHead(200);
+
 log.emit('error','Hi emit');
 response.end('Hello');
 
