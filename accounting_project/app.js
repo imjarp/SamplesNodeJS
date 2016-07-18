@@ -25,6 +25,10 @@ app.post('/index.html',function(request,response){
 
 	upload(request,response,function(err){
 
+		console.log('Total de archivos ' + request.files.length )
+
+		console.log(request.body);
+		
 		if(err){
 			console.log(err);
 		}
@@ -35,7 +39,7 @@ app.post('/index.html',function(request,response){
 
 	});
 
-	console.log('Total de archivos ' + request.files.length )
+	
 	response.end();
 		
 });
