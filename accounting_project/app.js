@@ -1,13 +1,16 @@
 var express = require('express');
-var app = express();
 var multer = require('multer');
 var bodyParser = require('body-parser');
+var facturaParser = require('./facturaParser');
+var app = express();
+
 
 app.use(bodyParser.json());
 
+
 var storage =   multer.diskStorage({
   destination: function (req, file, callback) {
-    callback(null, './uploads');
+  	callback(null, './uploads');
   },
   filename: function (req, file, callback) {
     callback(null, file.fieldname + '-' + Date.now());
@@ -27,7 +30,11 @@ app.post('/index.html',function(request,response){
 
 		console.log('Total de archivos ' + request.files.length )
 
+		console.log(request.files);
+
 		console.log(request.body);
+
+
 		
 		if(err){
 			console.log(err);
@@ -35,6 +42,7 @@ app.post('/index.html',function(request,response){
 		else
 		{
 			console.log('sin error');
+			facturaParser.parseDirectory('./uploads');
 		}
 
 	});

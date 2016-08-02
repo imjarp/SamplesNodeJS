@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+</head>
+<body>
+Hello
+</body>
+<script type="/socket.io/socket.io.js"></script>
+<script>
+	var socket = io.connect('http://localhost:8080');
+
+	socket.on('messages',function (mssg) {
+		// body...
+		alert(mssg.hello);
+	});
+</script>
+</html>
