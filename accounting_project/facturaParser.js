@@ -1,33 +1,140 @@
 
 var fs = require('fs');
-var xml2js = require('xml2js');
-var parseDirectory = function (destinationFolder) {
-	// body...
-	var files = fs.readdir(destinationFolder,function (err,files){
-	if (!err) 
-	{
+var parseXml = require('xml2js').parseString;
+var moment = require('moment');
 
-		files.forEach(function(fileName){
-			console.log(destinationFolder +'/'+ fileName)
-			readFile(destinationFolder +'/'+ fileName);
-		});		
-	}	
+
+var parseDirectory = function (destinationFolder) {
+
+
+	//console.log(facturaArray)
+	// body...
+	var facturaArray = [];
+	var index = 0;
+	
+	var files = fs.readdir(destinationFolder,function (err,files){
+	
+	index = files.length;
+	if (!err) 
+		files.forEach( (fileName)=>{  
+			
+			readFile(destinationFolder +'/'+ fileName,addFactura);
+
+		});
 	else
 		throw err; 
 	});
 
+	function addFactura(factura)
+	{
+		//console.log(factura);
+		facturaArray.push(factura);
+		//console.log(index);
+		if(facturaArray.length === index) next();
+
+	}
+
+	
+
 }
 
 
-function readFile(fileName)
+function next()
 {
+	console.log('Termine');
+	console.log(facturaArray);
+
+}
+
+
+
+function readFile(fileName, cb)
+{
+
 	fs.readFile(fileName,'utf-8', (err, data) => {
   		if (err) throw err;
-  		console.log('Leyendo archivo-----------');
-		console.log(data);
-		console.log('Terminando archivo-----------')
+
+  		parseXml(data, (err,result)=>{ 
+
+  		if (err) throw err;
+
+  			var fac =createFactura(result,fileName);
+  			cb(fac);
+  			//console.log(facturaArray);
+  			return fac;
+			
+  		});
+
+	});
+}
+
+function filterFacturas(facturaArray)
+{
+	console.log(facturaArray);
+	var filter = facturaArray.filter((elem,index,self) => 
+	{
+		//console.log("self" + self);
+
+		//console.log("elem" + elem);
 	});
 
+	//console.log(filter);
+}
+
+
+function createFactura( facturaObject, fileName)
+{
+	var factura = new Factura();
+	try
+	{
+		factura.fileName = fileName;
+		var tipoDeComprobante = facturaObject['cfdi:Comprobante']['$'].tipoDeComprobante;
+		var subtotal =  parseFloat(facturaObject['cfdi:Comprobante']['$'].subTotal);
+		var total = parseFloat(facturaObject['cfdi:Comprobante']['$'].total);
+		var fecha = facturaObject['cfdi:Comprobante']['$'].fecha;
+		var rfcEmisor = facturaObject['cfdi:Comprobante']['cfdi:Emisor'][0]['$']['rfc'];
+		var rfcReceptor = facturaObject['cfdi:Comprobante']['cfdi:Receptor'][0]['$']['rfc'];
+		var UUID = facturaObject['cfdi:Comprobante']['cfdi:Complemento'][0]['tfd:TimbreFiscalDigital'][0]['$']['UUID']
+
+		
+		factura.tipoDeComprobante = tipoDeComprobante;
+		factura.fecha = fecha;
+		factura.total = total;
+		factura.subtotal = subtotal;
+		factura.rfcEmisor = rfcEmisor;
+		factura.rfcReceptor = rfcReceptor;
+		factura.uuid = UUID;
+		//console.log(factura);
+
+	} catch (err)
+	{
+		factura.err = true;
+		factura.errMessage= err;
+	}
+	finally
+	{
+		return factura;
+	}
+}
+
+function Factura()
+{
+	var 
+	 err,
+	 errMessage,
+	 rfcEmisor,
+	 rfcReceptor,
+	 fileName,
+	 fecha,
+	 year,
+	 month,
+	 isIngreso,
+	 uuid,
+	 iva,
+	 isr,
+	 subtotal,
+	 tipoDeComprobante,
+	 total = undefined;
 }
 
 

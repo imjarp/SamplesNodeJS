@@ -28,11 +28,11 @@ app.post('/index.html',function(request,response){
 
 	upload(request,response,function(err){
 
-		console.log('Total de archivos ' + request.files.length )
+		//console.log('Total de archivos ' + request.files.length )
 
-		console.log(request.files);
+		//console.log(request.files);
 
-		console.log(request.body);
+		//console.log(request.body);
 
 
 		
@@ -41,7 +41,7 @@ app.post('/index.html',function(request,response){
 		}
 		else
 		{
-			console.log('sin error');
+			//console.log('sin error');
 			facturaParser.parseDirectory('./uploads');
 		}
 
