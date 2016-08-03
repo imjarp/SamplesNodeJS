@@ -55,7 +55,6 @@ function readFile(fileName, cb)
 
   			var fac =createFactura(result,fileName);
   			cb(fac);
-  			//console.log(facturaArray);
   			return fac;
 			
   		});
