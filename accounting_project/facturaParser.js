@@ -3,6 +3,7 @@ var fs = require('fs');
 var parseXml = require('xml2js').parseString;
 var moment = require('moment');
 const dateFormat = 'YYYY-MM-DDTHH:mm:ss';
+const dateFormatOutput = 'YYYY-MM-DD';
 
 	var parseDirectory = function (destinationFolder) {
 
@@ -37,20 +38,16 @@ const dateFormat = 'YYYY-MM-DDTHH:mm:ss';
 		console.log('Termine');
 
 		var filter = filterFacturas(facturaArray);
-		
-		filter.sort((a,b)=>{
 
+		var sorted = sortFacturas(filter);
 
-			if(a.date==b.date) return 0;
+		var lineArray =  [];
 
-			if(a.date>b.date) return 1;
+		for (var i = sorted.length - 1; i >= 0; i--) {
+			lineArray.push(createLineFactura(sorted[i]));
+		}
 
-			if(a.date<b.date) return -1	;
-
-
-		});
-
-		console.log(filter);
+		console.log(lineArray);
 	}
 
 }
@@ -76,10 +73,32 @@ function readFile(fileName, cb)
 	});
 }
 
+function createLineFactura(factura)
+{
+	var dateOutput = moment(factura.date).format(dateFormatOutput);
+	var line = `${factura.tipoDeComprobante},${dateOutput},${factura.rfcEmisor},${factura.rfcReceptor},${factura.subtotal},${factura.total}`;
+	return line;
+}
+
 function filterFacturas(facturaArray)
 {
 	var filter = facturaArray.filter((elem,index,self   )=> self.findIndex ((t)=>  {return t.uuid === elem.uuid  }) === index)
 	return filter;
+}
+
+function sortFacturas(facturaArray)
+{
+	return facturaArray.sort((a,b)=>{
+
+
+			if(a.date==b.date) return 0;
+
+			if(a.date>b.date) return 1;
+
+			if(a.date<b.date) return -1	;
+
+
+		});
 }
 
 
