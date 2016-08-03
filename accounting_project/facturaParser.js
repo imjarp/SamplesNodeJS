@@ -2,9 +2,9 @@
 var fs = require('fs');
 var parseXml = require('xml2js').parseString;
 var moment = require('moment');
+const dateFormat = 'YYYY-MM-DDTHH:mm:ss';
 
-
-var parseDirectory = function (destinationFolder) {
+	var parseDirectory = function (destinationFolder) {
 
 
 	//console.log(facturaArray)
@@ -35,7 +35,21 @@ var parseDirectory = function (destinationFolder) {
 	function next()
 	{
 		console.log('Termine');
+
 		var filter = filterFacturas(facturaArray);
+		
+		filter.sort((a,b)=>{
+
+
+			if(a.date==b.date) return 0;
+
+			if(a.date>b.date) return 1;
+
+			if(a.date<b.date) return -1	;
+
+
+		});
+
 		console.log(filter);
 	}
 
@@ -65,6 +79,7 @@ function readFile(fileName, cb)
 function filterFacturas(facturaArray)
 {
 	var filter = facturaArray.filter((elem,index,self   )=> self.findIndex ((t)=>  {return t.uuid === elem.uuid  }) === index)
+	return filter;
 }
 
 
@@ -90,7 +105,7 @@ function createFactura( facturaObject, fileName)
 		factura.rfcEmisor = rfcEmisor;
 		factura.rfcReceptor = rfcReceptor;
 		factura.uuid = UUID;
-		//console.log(factura);
+		factura.date = moment(factura.fecha , dateFormat);
 
 	} catch (err)
 	{
@@ -112,8 +127,7 @@ function Factura()
 	 rfcReceptor,
 	 fileName,
 	 fecha,
-	 year,
-	 month,
+	 date,
 	 isIngreso,
 	 uuid,
 	 iva,
@@ -121,6 +135,11 @@ function Factura()
 	 subtotal,
 	 tipoDeComprobante,
 	 total = undefined;
+
+	 function getYear(){
+
+
+	 };
 }
 
 
