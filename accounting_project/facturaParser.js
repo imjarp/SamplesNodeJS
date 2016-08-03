@@ -27,22 +27,17 @@ var parseDirectory = function (destinationFolder) {
 
 	function addFactura(factura)
 	{
-		//console.log(factura);
 		facturaArray.push(factura);
-		//console.log(index);
 		if(facturaArray.length === index) next();
 
 	}
 
-	
-
-}
-
-
-function next()
-{
-	console.log('Termine');
-	console.log(facturaArray);
+	function next()
+	{
+		console.log('Termine');
+		var filter = filterFacturas(facturaArray);
+		console.log(filter);
+	}
 
 }
 
@@ -70,15 +65,7 @@ function readFile(fileName, cb)
 
 function filterFacturas(facturaArray)
 {
-	console.log(facturaArray);
-	var filter = facturaArray.filter((elem,index,self) => 
-	{
-		//console.log("self" + self);
-
-		//console.log("elem" + elem);
-	});
-
-	//console.log(filter);
+	var filter = facturaArray.filter((elem,index,self   )=> self.findIndex ((t)=>  {return t.uuid === elem.uuid  }) === index)
 }
 
 
