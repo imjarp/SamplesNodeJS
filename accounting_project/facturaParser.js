@@ -47,7 +47,19 @@ const dateFormatOutput = 'YYYY-MM-DD';
 			lineArray.push(createLineFactura(sorted[i]));
 		}
 
-		console.log(lineArray);
+		var stream = fs.createWriteStream('output.txt');
+
+		stream.once('open',function(fd)
+		{
+
+			for (var i = lineArray.length - 1; i >= 0; i--) {
+				stream.write(lineArray[i]+'\n');
+			}
+
+			stream.end()
+
+		});
+		
 	}
 
 }
@@ -62,7 +74,10 @@ function readFile(fileName, cb)
 
   		parseXml(data, (err,result)=>{ 
 
-  		if (err) throw err;
+  		if (err){
+  		console.log(err);
+  		return;	
+  		} 
 
   			var fac =createFactura(result,fileName);
   			cb(fac);
@@ -76,7 +91,7 @@ function readFile(fileName, cb)
 function createLineFactura(factura)
 {
 	var dateOutput = moment(factura.date).format(dateFormatOutput);
-	var line = `${factura.tipoDeComprobante},${dateOutput},${factura.rfcEmisor},${factura.rfcReceptor},${factura.subtotal},${factura.total}`;
+	var line = `${factura.tipoDeComprobante},${dateOutput},${factura.rfcEmisor},${factura.rfcReceptor},"${factura.nombreEmisor}","${factura.concepto}",${factura.subtotal},${factura.total}`;
 	return line;
 }
 
@@ -89,7 +104,6 @@ function filterFacturas(facturaArray)
 function sortFacturas(facturaArray)
 {
 	return facturaArray.sort((a,b)=>{
-
 
 			if(a.date==b.date) return 0;
 
@@ -112,9 +126,11 @@ function createFactura( facturaObject, fileName)
 		var subtotal =  parseFloat(facturaObject['cfdi:Comprobante']['$'].subTotal);
 		var total = parseFloat(facturaObject['cfdi:Comprobante']['$'].total);
 		var fecha = facturaObject['cfdi:Comprobante']['$'].fecha;
+		var emisor = facturaObject['cfdi:Comprobante']['cfdi:Emisor'][0]['$']['nombre'];
 		var rfcEmisor = facturaObject['cfdi:Comprobante']['cfdi:Emisor'][0]['$']['rfc'];
 		var rfcReceptor = facturaObject['cfdi:Comprobante']['cfdi:Receptor'][0]['$']['rfc'];
 		var UUID = facturaObject['cfdi:Comprobante']['cfdi:Complemento'][0]['tfd:TimbreFiscalDigital'][0]['$']['UUID']
+		var concepto = facturaObject['cfdi:Comprobante']['cfdi:Conceptos'][0]['cfdi:Concepto'][0]['$']['descripcion'];
 
 		
 		factura.tipoDeComprobante = tipoDeComprobante;
@@ -122,9 +138,11 @@ function createFactura( facturaObject, fileName)
 		factura.total = total;
 		factura.subtotal = subtotal;
 		factura.rfcEmisor = rfcEmisor;
+		factura.nombreEmisor = emisor;
 		factura.rfcReceptor = rfcReceptor;
 		factura.uuid = UUID;
 		factura.date = moment(factura.fecha , dateFormat);
+		factura.concepto = concepto;
 
 	} catch (err)
 	{
@@ -143,6 +161,7 @@ function Factura()
 	 err,
 	 errMessage,
 	 rfcEmisor,
+	 nombreEmisor,
 	 rfcReceptor,
 	 fileName,
 	 fecha,
@@ -153,6 +172,7 @@ function Factura()
 	 isr,
 	 subtotal,
 	 tipoDeComprobante,
+	 concepto,
 	 total = undefined;
 
 	 function getYear(){
