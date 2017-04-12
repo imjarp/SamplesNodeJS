@@ -18,8 +18,15 @@ const dateFormatOutput = 'YYYY-MM-DD';
 	index = files.length;
 	if (!err) 
 		files.forEach( (fileName)=>{  
+			if(fileName.endsWith('.DS_Store')) 
+  			{
+  				index = index - 1;
+  			}
+  			else
+  			{
+  				readFile(destinationFolder +'/'+ fileName,addFactura);	
+  			}
 			
-			readFile(destinationFolder +'/'+ fileName,addFactura);
 
 		});
 	else
@@ -29,7 +36,7 @@ const dateFormatOutput = 'YYYY-MM-DD';
 	function addFactura(factura)
 	{
 		facturaArray.push(factura);
-		if(facturaArray.length === index) next();
+		if(facturaArray.length === index ) next();
 
 	}
 
@@ -71,6 +78,7 @@ function readFile(fileName, cb)
 
 	fs.readFile(fileName,'utf-8', (err, data) => {
   		if (err) throw err;
+  		
 
   		parseXml(data, (err,result)=>{ 
 
@@ -91,7 +99,9 @@ function readFile(fileName, cb)
 function createLineFactura(factura)
 {
 	var dateOutput = moment(factura.date).format(dateFormatOutput);
-	var line = `${factura.tipoDeComprobante},${dateOutput},${factura.rfcEmisor},${factura.rfcReceptor},"${factura.nombreEmisor}","${factura.concepto}",${factura.subtotal},${factura.total}`;
+	var line = `${factura.tipoDeComprobante},${dateOutput},${factura.rfcEmisor},${factura.rfcReceptor},"${factura.nombreEmisor}","${factura.concepto}",${factura.totalRetencionIsr},${factura.totalRetencionIva},${factura.totalTrasladoIva},${factura.subtotal},${factura.total}`;
+	//var line = `${factura.tipoDeComprobante},${dateOutput},${factura.rfcEmisor},${factura.rfcReceptor},"${factura.nombreEmisor}","${factura.concepto}",${factura.subtotal},${factura.total}`;
+
 	return line;
 }
 
@@ -131,7 +141,22 @@ function createFactura( facturaObject, fileName)
 		var rfcReceptor = facturaObject['cfdi:Comprobante']['cfdi:Receptor'][0]['$']['rfc'];
 		var UUID = facturaObject['cfdi:Comprobante']['cfdi:Complemento'][0]['tfd:TimbreFiscalDigital'][0]['$']['UUID']
 		var concepto = facturaObject['cfdi:Comprobante']['cfdi:Conceptos'][0]['cfdi:Concepto'][0]['$']['descripcion'];
-
+		var retencionesObject = facturaObject['cfdi:Comprobante']['cfdi:Impuestos'][0]['cfdi:Retenciones'][0]['cfdi:Retencion'];
+		var trasladosObject = facturaObject['cfdi:Comprobante']['cfdi:Impuestos'][0]['cfdi:Traslados'][0]['cfdi:Traslado'];
+		var totalRetencionIva = 0;
+		var totalRetencionIsr = 0;
+		var totalTrasladoIva = 0
+		var index = 0 ;
+		for( ; index < retencionesObject.length ; index++){
+			var ret = retencionesObject[index];
+			if (ret['$']['impuesto'].toLocaleLowerCase()==='iva') totalRetencionIva =  ret['$']['importe'];
+			if (ret['$']['impuesto'].toLocaleLowerCase()==='isr') totalRetencionIsr =  ret['$']['importe'];
+		}
+		index = 0 ;
+		for( ; index < trasladosObject.length ; index++){
+			var tra = trasladosObject[index];
+			if (tra['$']['impuesto'].toLocaleLowerCase()==='iva') totalTrasladoIva =  tra['$']['importe'];
+		}
 		
 		factura.tipoDeComprobante = tipoDeComprobante;
 		factura.fecha = fecha;
@@ -143,6 +168,9 @@ function createFactura( facturaObject, fileName)
 		factura.uuid = UUID;
 		factura.date = moment(factura.fecha , dateFormat);
 		factura.concepto = concepto;
+		factura.totalTrasladoIva = totalTrasladoIva;
+		factura.totalRetencionIva = totalRetencionIva ;
+		factura.totalRetencionIsr = totalRetencionIsr;
 
 	} catch (err)
 	{
@@ -173,6 +201,9 @@ function Factura()
 	 subtotal,
 	 tipoDeComprobante,
 	 concepto,
+	 totalRetencionIva,
+	 totalRetencionIsr,
+	 totalTrasladoIva,
 	 total = undefined;
 
 	 function getYear(){
