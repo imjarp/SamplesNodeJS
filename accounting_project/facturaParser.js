@@ -99,8 +99,8 @@ function readFile(fileName, cb)
 function createLineFactura(factura)
 {
 	var dateOutput = moment(factura.date).format(dateFormatOutput);
-	var line = `${factura.uuid},${dateOutput},${factura.rfcEmisor},${factura.rfcReceptor},"${factura.nombreEmisor}","${factura.concepto}",${factura.totalRetencionIsr},${factura.totalRetencionIva},${factura.totalTrasladoIva},${factura.subtotal},${factura.total}`;
-	//var line = `${factura.tipoDeComprobante},${dateOutput},${factura.rfcEmisor},${factura.rfcReceptor},"${factura.nombreEmisor}","${factura.concepto}",${factura.subtotal},${factura.total}`;
+	//var line = `${factura.uuid},${dateOutput},${factura.rfcEmisor},${factura.rfcReceptor},"${factura.nombreEmisor}","${factura.concepto}",${factura.totalRetencionIsr},${factura.totalRetencionIva},${factura.totalTrasladoIva},${factura.subtotal},${factura.total}`;
+	var line = `${factura.tipoDeComprobante},${dateOutput},${factura.rfcEmisor},${factura.rfcReceptor},"${factura.nombreEmisor}","${factura.concepto}",${factura.subtotal},${factura.total}`;
 
 	return line;
 }
